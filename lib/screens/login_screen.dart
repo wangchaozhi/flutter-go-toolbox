@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../services/auth_repository.dart';
 import '../services/token_storage.dart';
+import '../widgets/version_badge.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -242,6 +243,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             child: const Text('还没有账号？立即注册'),
                           ),
+                          const SizedBox(height: 16),
+                          const Center(child: VersionBadge()),
                         ],
                       ),
                     ),

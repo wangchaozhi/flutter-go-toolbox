@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthflutter/screens/login_screen.dart';
+import 'package:healthflutter/services/app_info_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:healthflutter/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() {
+    PackageInfo.setMockInitialValues(
+      appName: 'healthflutter',
+      packageName: 'healthflutter',
+      version: '0.3.19',
+      buildNumber: '19',
+      buildSignature: '',
+    );
+    AppInfoService.clearCache();
+  });
+
   testWidgets('未登录时显示登录页', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
@@ -15,6 +28,7 @@ void main() {
 
     expect(find.text('登录'), findsWidgets);
     expect(find.text('记住密码'), findsOneWidget);
+    expect(find.text('v0.3.19'), findsOneWidget);
   });
 
   testWidgets('返回登录页回填密码，取消记住后删除凭据', (tester) async {
