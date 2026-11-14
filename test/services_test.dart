@@ -12,7 +12,7 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('迁移旧 token 并删除明文密码', () async {
+    test('迁移旧 token 和密码到安全存储', () async {
       SharedPreferences.setMockInitialValues({
         'token': 'legacy-token',
         'remembered_username': 'alice',
@@ -22,11 +22,30 @@ void main() {
 
       expect(await TokenStorage.getToken(), 'legacy-token');
       expect(await TokenStorage.getRememberedUsername(), 'alice');
+      expect(await TokenStorage.getRememberedPassword(), 'plain-password');
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.containsKey('token'), isFalse);
       expect(prefs.containsKey('remembered_password'), isFalse);
 
+      await TokenStorage.clearToken();
+    });
+
+    test('记住密码后可读取，取消记忆会清除凭据但保留登录状态', () async {
+      await TokenStorage.saveToken('active-session');
+      await TokenStorage.saveRememberedCredentials('bob', 'secret');
+      expect(await TokenStorage.getRememberedUsername(), 'bob');
+      expect(await TokenStorage.getRememberedPassword(), 'secret');
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.containsKey('remembered_password'), isFalse);
+      await TokenStorage.clearRememberedUsername();
+      expect(await TokenStorage.getRememberedUsername(), isNull);
+      expect(await TokenStorage.getRememberedPassword(), isNull);
+      expect(
+        await const FlutterSecureStorage().read(key: 'remembered_password'),
+        isNull,
+      );
+      expect(await TokenStorage.getToken(), 'active-session');
       await TokenStorage.clearToken();
     });
 
